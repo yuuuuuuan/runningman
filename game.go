@@ -7,14 +7,6 @@ const (
 	screenHeight = 500
 )
 
-type Position struct {
-	x      int
-	y      int
-	width  int
-	height int
-	img    *ebiten.Image
-}
-
 type Game struct {
 	input *Input
 }
