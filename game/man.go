@@ -11,7 +11,7 @@ var (
 )
 
 const (
-	movingSpeed = 3
+	movingSpeed = 1
 )
 
 type Frame struct {
@@ -26,6 +26,10 @@ type Man struct {
 	img   *ebiten.Image
 }
 
+func (m *Man) IfCollision(o *Obstacle) (dir, bool) {
+	return CheckCollision(m.frame, o.frame)
+}
+
 func NewMan() (*Man, error) {
 	img, _, errImg := ebitenutil.NewImageFromFile("D:\\Program Files\\JetBrains\\GoLand 2023.1.3\\workspaces\\runningman\\game\\img.png")
 	if errImg != nil {
@@ -35,8 +39,8 @@ func NewMan() (*Man, error) {
 	w := runningImg.Bounds().Dx()
 	h := runningImg.Bounds().Dy()
 	f := &Frame{
-		x:      screenWidth / 2,
-		y:      screenHeight / 2,
+		x:      0,
+		y:      0,
 		width:  w,
 		height: h,
 	}
@@ -47,15 +51,29 @@ func NewMan() (*Man, error) {
 	return m, errImg
 }
 
-func (m *Man) Update(i *Input) {
+func (m *Man) Update(i *Input, o *Obstacle) {
+	dir, _ := m.IfCollision(o)
+
 	switch i.state {
 	case keyup:
+		if dir == "down" {
+			return
+		}
 		m.frame.y -= movingSpeed
 	case keydown:
+		if dir == "up" {
+			return
+		}
 		m.frame.y += movingSpeed
 	case keyleft:
+		if dir == "right" {
+			return
+		}
 		m.frame.x -= movingSpeed
 	case keyright:
+		if dir == "left" {
+			return
+		}
 		m.frame.x += movingSpeed
 	}
 }

@@ -10,18 +10,20 @@ const (
 )
 
 type Game struct {
-	input *Input
-	man   *Man
+	input    *Input
+	man      *Man
+	obstacle *Obstacle
 }
 
 func (g *Game) Update() error {
 	g.input.Update()
-	g.man.Update(g.input)
+	g.man.Update(g.input, g.obstacle)
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.man.Draw(screen)
+	g.obstacle.Draw(screen)
 }
 
 func (g *Game) Layout(int, int) (int, int) {
@@ -30,12 +32,17 @@ func (g *Game) Layout(int, int) (int, int) {
 
 func NewGame() *Game {
 	i := NewInput()
-	m, err := NewMan()
-	if err != nil {
-		panic(err)
+	m, err1 := NewMan()
+	if err1 != nil {
+		panic(err1)
+	}
+	o, err2 := NewObstacle()
+	if err2 != nil {
+		panic(err2)
 	}
 	return &Game{
-		input: i,
-		man:   m,
+		input:    i,
+		man:      m,
+		obstacle: o,
 	}
 }
