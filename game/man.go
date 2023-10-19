@@ -3,6 +3,7 @@ package game
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"image"
 	_ "image/png"
 )
 
@@ -26,6 +27,17 @@ type Man struct {
 	img   *ebiten.Image
 }
 
+const (
+	forward = iota
+	leftward
+	rightward
+	backward
+)
+
+const (
+	stop = iota
+)
+
 func (m *Man) IfCollision(o *Obstacle) (dir, bool) {
 	return CheckCollision(m.frame, o.frame)
 }
@@ -35,6 +47,7 @@ func NewMan() (*Man, error) {
 	if errImg != nil {
 		panic(errImg)
 	}
+
 	runningImg = ebiten.NewImageFromImage(img)
 	w := runningImg.Bounds().Dx()
 	h := runningImg.Bounds().Dy()
@@ -53,7 +66,6 @@ func NewMan() (*Man, error) {
 
 func (m *Man) Update(i *Input, o *Obstacle) {
 	dir, _ := m.IfCollision(o)
-
 	switch i.state {
 	case keyup:
 		if dir == "down" {
@@ -78,8 +90,30 @@ func (m *Man) Update(i *Input, o *Obstacle) {
 	}
 }
 
-func (m *Man) Draw(screen *ebiten.Image) {
+var (
+	psy int
+)
+
+func (m *Man) Draw(screen *ebiten.Image, state int, counter int) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(m.frame.x), float64(m.frame.y))
-	screen.DrawImage(m.img, op)
+	w := m.img.Bounds().Dx() / 4
+	h := m.img.Bounds().Dy() / 4
+	sx := counter
+	var sy int
+	switch state {
+	case keyup:
+		sy = backward
+	case keydown:
+		sy = forward
+	case keyleft:
+		sy = leftward
+	case keyright:
+		sy = rightward
+	case keynone:
+		sy = psy
+		sx = stop
+	}
+	screen.DrawImage(m.img.SubImage(image.Rect(sx*w, sy*h, (sx+1)*w, (sy+1)*h)).(*ebiten.Image), op)
+	psy = sy
 }
